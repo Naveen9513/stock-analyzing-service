@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, Depends
 from app.service.SymbolService import SymbolService
+from app.repository.SymbolRepository import SymbolRepository
 
 # Using a prefix keeps your URLs clean
 router = APIRouter(prefix="/symbols")
@@ -8,7 +9,9 @@ router = APIRouter(prefix="/symbols")
 # Creates the service and its requirements
 def get_symbol_service():
     # In the future, you'll pass your actual Repo and API Client here
-    return SymbolService()
+
+    dbManager = None #TODO: create database connection
+    return SymbolService(SymbolRepository(db_manager = dbManager))
 
 @router.get("/{symbol}/annual/{year}")
 def get_annual_data(
