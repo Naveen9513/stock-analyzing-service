@@ -34,7 +34,6 @@ SYMBOL_FETCHED_TABLE = '''
 
 # Create indexes for optimal query performance
 CREATE_INDEX_SYMBOL_YEAR = 'CREATE INDEX IF NOT EXISTS idx_monthly_price_symbol_year ON monthly_price(symbol_id, year)'
-CREATE_INDEX_SYMBOL = 'CREATE INDEX IF NOT EXISTS idx_monthly_price_symbol ON monthly_price(symbol_id)'
 CREATE_UNIQUE_INDEX = 'CREATE UNIQUE INDEX IF NOT EXISTS idx_monthly_price_unique ON monthly_price(symbol_id, year, month)'
 
 # All tables to create
@@ -47,8 +46,7 @@ TABLES = [
 # Index creation statements (executed after tables)
 INDEXES = [
     CREATE_UNIQUE_INDEX,
-    CREATE_INDEX_SYMBOL_YEAR,
-    CREATE_INDEX_SYMBOL,
+    CREATE_INDEX_SYMBOL_YEAR
 ]
 
 
