@@ -23,6 +23,15 @@ MONTHLY_PRICE_TABLE = '''
     )
 '''
 
+SYMBOL_FETCHED_TABLE = '''
+    CREATE TABLE IF NOT EXISTS symbol_fetched (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        symbol_id INTEGER NOT NULL,
+        last_fetch_date DATETIME,
+        FOREIGN KEY (symbol_id) REFERENCES symbol(id)
+    )
+'''
+
 # Create indexes for optimal query performance
 CREATE_INDEX_SYMBOL_YEAR = 'CREATE INDEX IF NOT EXISTS idx_monthly_price_symbol_year ON monthly_price(symbol_id, year)'
 CREATE_INDEX_SYMBOL = 'CREATE INDEX IF NOT EXISTS idx_monthly_price_symbol ON monthly_price(symbol_id)'
@@ -32,6 +41,7 @@ CREATE_UNIQUE_INDEX = 'CREATE UNIQUE INDEX IF NOT EXISTS idx_monthly_price_uniqu
 TABLES = [
     SYMBOL_TABLE,
     MONTHLY_PRICE_TABLE,
+    SYMBOL_FETCHED_TABLE
 ]
 
 # Index creation statements (executed after tables)

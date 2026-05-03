@@ -1,27 +1,56 @@
+from datetime import datetime
+
 class SymbolRepository:
     def __init__(self, db_manager):
         self.db_manager = db_manager
 
-    def get_aggregated_data(self, symbol: str, year: int):
+    def get_aggregated_data_with_fetch_date(self, symbol: str, year: int):
+        """
+        Get aggregated data AND last fetch date in a single query.
+        This combines two separate queries into one for better performance.
+
+        Returns:
+            tuple: (aggregated_data_dict, last_fetch_date) or (None, None) if no data
+        """
         query = """
-            SELECT MAX(mp.high), MIN(mp.low), SUM(mp.volume)
-            FROM monthly_price mp
-            JOIN symbol s ON mp.symbol_id = s.id
-            WHERE s.symbol = ? AND mp.year = ?
+            SELECT MAX(mp.high), MIN(mp.low), SUM(mp.volume), sf.last_fetch_date
+            FROM symbol s
+            LEFT JOIN monthly_price mp ON s.id = mp.symbol_id AND mp.year = ?
+            LEFT JOIN symbol_fetched sf ON s.id = sf.symbol_id
+            WHERE s.symbol = ?
+            GROUP BY s.id
         """
         with self.db_manager.get_connection() as conn:
-            cursor = conn.execute(query, (symbol.upper(), year))
+            cursor = conn.execute(query, (year, symbol.upper()))
             row = cursor.fetchone()
-            
-            if row and row[0] is not None:
-                return {
+
+            if not row:
+                return None, None
+
+            # Extract values
+            high, low, volume, last_fetch_date_str = row
+
+            # If no monthly data for this year
+            if high is None:
+                aggregated_data = None
+            else:
+                aggregated_data = {
                     "symbol": symbol.upper(),
                     "year": year,
-                    "high": row[0],
-                    "low": row[1],
-                    "volume": row[2]
+                    "high": high,
+                    "low": low,
+                    "volume": volume
                 }
-            return None
+
+            # Parse last_fetch_date if it exists
+            last_fetch_date = None
+            if last_fetch_date_str:
+                try:
+                    last_fetch_date = datetime.fromisoformat(last_fetch_date_str)
+                except (ValueError, TypeError):
+                    last_fetch_date = None
+
+            return aggregated_data, last_fetch_date
     
     def save_monthly_data(self, symbol: str, incoming_data: dict):
         """
@@ -62,5 +91,11 @@ class SymbolRepository:
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
             conn.executemany(query, insert_payload)
+
+            # 4. Update the symbol_fetched table to mark this symbol as fetched
+            conn.execute(
+                "INSERT OR REPLACE INTO symbol_fetched (symbol_id, last_fetch_date) VALUES (?, ?)",
+                (symbol_id, datetime.now())
+            )
             conn.commit()
     
