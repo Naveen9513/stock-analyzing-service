@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from app.repository.schema import TABLES, INDEXES, DUMMY_DATA
+from app.repository.schema import TABLES, INDEXES
 
 # Get absolute path from environment variable
 db_path_env = os.getenv('DATABASE_PATH')

@@ -41,8 +41,5 @@ INDEXES = [
     CREATE_INDEX_SYMBOL,
 ]
 
-# Dummy data for initial setup
-DUMMY_DATA = {
-    'symbol': ['AAPL', 'GOOGL', 'MSFT', 'TSLA', 'AMZN']
-}
+
 
