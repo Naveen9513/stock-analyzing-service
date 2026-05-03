@@ -3,6 +3,33 @@ from datetime import datetime
 class SymbolRepository:
     def __init__(self, db_manager):
         self.db_manager = db_manager
+    
+    def get_aggregated_data(self, symbol: str, year: int):
+        """
+        Get aggregated data for a specific year.
+        """
+        query = """
+            SELECT MAX(mp.high), MIN(mp.low), SUM(mp.volume)
+            FROM symbol s
+            LEFT JOIN monthly_price mp ON s.id = mp.symbol_id AND mp.year = ?
+            WHERE s.symbol = ?
+            GROUP BY s.id
+        """
+        with self.db_manager.get_connection() as conn:
+            cursor = conn.execute(query, (year, symbol.upper()))
+            row = cursor.fetchone()
+
+            if not row:
+                return None
+
+            high, low, volume = row
+            return {
+                "symbol": symbol.upper(),
+                "year": year,
+                "high": high,
+                "low": low,
+                "volume": volume
+            }
 
     def get_aggregated_data_with_fetch_date(self, symbol: str, year: int):
         """
