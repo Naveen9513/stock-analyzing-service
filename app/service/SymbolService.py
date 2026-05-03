@@ -1,8 +1,7 @@
 from app.repository.SymbolRepository import SymbolRepository
 from app.external.IStockDataProvider import IStockDataProvider
 from datetime import datetime
-from functools import lru_cache
-
+from app.exception.Exceptions import DataNotFoundError, ExternalAPIError
 class SymbolService:
     def __init__(self,
                  symbolRepository: SymbolRepository,
@@ -27,21 +26,21 @@ class SymbolService:
 
         if self._is_data_fresh_enough(last_fetch_date, year):
             print("Data is fresh enough. Returning from local db...")
+            if db_data is None:
+                raise DataNotFoundError(f"No data found for {symbol} in {year}")
+
             return db_data
 
         # Step 2: Data not in DB or not updated recently - fetch from external provider
-        try:
-            print("Data is stale or missing ==> Fetching from external service")
-            monthly_data = self.stockDataProvider.fetch_monthly_data(symbol)
+        print("Data is stale or missing ==> Fetching from external service")
+        monthly_data = self.stockDataProvider.fetch_monthly_data(symbol)
 
-            # Step 3: Save fetched data to database
-            self.symbolRepository.save_monthly_data(symbol, monthly_data)
+        # Step 3: Save fetched data to database
+        self.symbolRepository.save_monthly_data(symbol, monthly_data)
 
-            # Step 4: Aggregate from fresh data in memory (no need to query DB again)
-            return self._aggregate_monthly_data(symbol, year, monthly_data["data"])
+        # Step 4: Aggregate from fresh data in memory (no need to query DB again)
+        return self._aggregate_monthly_data(symbol, year, monthly_data["data"])
 
-        except Exception as e:
-            raise Exception(f"Failed to get data for {symbol}: {str(e)}")
         
     def _aggregate_monthly_data(self, symbol: str, year: int, monthly_data: dict):
         """

@@ -1,6 +1,7 @@
 import os
 import requests
 from app.external.IStockDataProvider import IStockDataProvider
+from app.exception.Exceptions import ExternalAPIError
 
 
 class AlphaVantageAdapter(IStockDataProvider):
@@ -34,7 +35,7 @@ class AlphaVantageAdapter(IStockDataProvider):
             # Parse the response
             return self._parse_response(symbol, data)
         except Exception as e:
-            raise Exception(f"Error fetching data from Alpha Vantage: {str(e)}")
+            raise ExternalAPIError(f"Error fetching data from Alpha Vantage: Check your inputs if they are correct or try again in some time")
     
     def _parse_response(self, symbol: str, api_response: dict) -> dict:
         """
@@ -50,7 +51,7 @@ class AlphaVantageAdapter(IStockDataProvider):
         time_series_key = 'Monthly Time Series'
         
         if time_series_key not in api_response:
-            raise Exception(f"Invalid response from Alpha Vantage: {api_response.get('Note', 'Unknown error')}")
+            raise ExternalAPIError(f"Invalid response from Alpha Vantage: {api_response.get('Note', 'Unknown error')}")
         
         monthly_data = {}
         for date_str, day_data in api_response[time_series_key].items():
