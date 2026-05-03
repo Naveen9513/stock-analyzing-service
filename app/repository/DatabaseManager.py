@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from app.repository.schema import TABLES, INDEXES
+from app.database.schema import TABLES, INDEXES
 
 # Get absolute path from environment variable
 db_path_env = os.getenv('DATABASE_PATH')
@@ -21,7 +21,9 @@ else:
 class DatabaseManager:
     """Manages SQLite database operations"""
     
-    def __init__(self, db_path=DB_PATH):
+    def __init__(self, db_path=None):
+        if db_path is None:
+            db_path = self._get_default_db_path()
         self.db_path = db_path
     
     def get_connection(self):
@@ -46,4 +48,18 @@ class DatabaseManager:
         conn.commit()
         conn.close()
         print(f"Database initialized at {self.db_path}")
+    
+    def _get_default_db_path(self):
+        """Calculate database path from environment variables"""
+        db_path_env = os.getenv('DATABASE_PATH')
+        db_name_env = os.getenv('DATABASE_NAME', 'stock.db')
+        
+        if db_path_env:
+            if os.path.isabs(db_path_env):
+                return os.path.join(db_path_env, db_name_env)
+            else:
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                return os.path.join(project_root, db_path_env, db_name_env)
+        else:
+            return os.path.join(os.path.dirname(__file__), db_name_env)
 
