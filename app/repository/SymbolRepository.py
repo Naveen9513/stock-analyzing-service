@@ -1,6 +1,5 @@
 class SymbolRepository:
     def __init__(self, db_manager):
-        # We 'inject' the manager here
         self.db_manager = db_manager
 
     def get_aggregated_data(self, symbol: str, year: int):

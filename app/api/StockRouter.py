@@ -8,7 +8,6 @@ router = APIRouter(prefix="/symbols")
 
 # Creates the service and its requirements
 def get_symbol_service():
-    # In the future, you'll pass your actual Repo and API Client here
 
     dbManager = None #TODO: create database connection
     return SymbolService(SymbolRepository(db_manager = dbManager))
