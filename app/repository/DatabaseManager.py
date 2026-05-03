@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from app.repository.schema import TABLES, DUMMY_DATA
+from app.repository.schema import TABLES, INDEXES, DUMMY_DATA
 
 # Get absolute path from environment variable
 db_path_env = os.getenv('DATABASE_PATH')
@@ -31,7 +31,7 @@ class DatabaseManager:
         return conn
     
     def init_db(self):
-        """Initialize the database with required tables"""
+        """Initialize the database with required tables and indexes"""
         conn = self.get_connection()
         cursor = conn.cursor()
         
@@ -39,14 +39,9 @@ class DatabaseManager:
         for table_schema in TABLES:
             cursor.execute(table_schema)
         
-        # Insert dummy data
-        dummy_symbols = DUMMY_DATA['symbol']
-        for sym in dummy_symbols:
-            try:
-                cursor.execute('INSERT INTO symbol (symbol) VALUES (?)', (sym,))
-            except sqlite3.IntegrityError:
-                # Symbol already exists, skip
-                pass
+        # Create indexes
+        for index_schema in INDEXES:
+            cursor.execute(index_schema)
         
         conn.commit()
         conn.close()
