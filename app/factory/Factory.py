@@ -4,6 +4,7 @@ from app.service.SymbolService import SymbolService
 from app.repository.DatabaseManager import DatabaseManager
 from app.api.StockRouter import create_stock_router
 
+
 class Factory:
     def __init__(self):
         # Create ALL dependencies here
