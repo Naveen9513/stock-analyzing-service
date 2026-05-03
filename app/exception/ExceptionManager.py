@@ -17,7 +17,7 @@ class ExceptionManager:
         async def handle_api_error(request: Request, exc: ExternalAPIError):
             return JSONResponse(
                 status_code=503,
-                content={"error": "External Service Unavailable", "message": str(exc)}
+                content={"error": "External Service Error", "message": str(exc)}
             )
         
         @app.exception_handler(ValidationError)
