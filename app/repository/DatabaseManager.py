@@ -47,4 +47,3 @@ class DatabaseManager:
         conn.close()
         print(f"Database initialized at {self.db_path}")
 
-db_manager = DatabaseManager()

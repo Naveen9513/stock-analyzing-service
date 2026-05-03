@@ -4,14 +4,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
-from app.api.StockRouter import router
-from app.repository.DatabaseManager import DatabaseManager
+from app.factory.Factory import Factory
 
-app = FastAPI()
 
 # Initialize database on startup
-db = DatabaseManager()
-db.init_db()
+factory = Factory()
 
-# include routers
-app.include_router(router)
+app = FastAPI()
+app.include_router(factory.get_stock_router())

@@ -1,8 +1,10 @@
 from app.repository.SymbolRepository import SymbolRepository
+from app.external.IStockDataProvider import IStockDataProvider
 
 class SymbolService:
-    def __init__(self, symbolRepository: SymbolRepository):
+    def __init__(self, symbolRepository: SymbolRepository, stockDataProvider: IStockDataProvider):
         self.symbolRepository = symbolRepository
+        self.stockDataProvider = stockDataProvider
 
     def get_annual_summary(self, symbol: str, year: int):
 
